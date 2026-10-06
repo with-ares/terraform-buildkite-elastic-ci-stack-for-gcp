@@ -16,15 +16,6 @@ locals {
   scheduler_job_name = "${var.function_name}-scheduler"
 }
 
-# Validate that exactly one token method is configured
-resource "null_resource" "token_validation" {
-  count = (local.use_secret_manager && local.use_env_token) || (!local.use_secret_manager && !local.use_env_token) ? 1 : 0
-
-  provisioner "local-exec" {
-    command = "echo 'ERROR: Exactly one of buildkite_agent_token or buildkite_agent_token_secret must be provided' && exit 1"
-  }
-}
-
 # Create service account if not provided
 resource "google_service_account" "metrics_function" {
   count        = local.create_service_account ? 1 : 0
@@ -109,6 +100,14 @@ resource "google_cloudfunctions2_function" "metrics_function" {
   }
 
   labels = var.labels
+
+  lifecycle {
+    # A precondition, unlike a count, tolerates a token or secret that's only known after apply.
+    precondition {
+      condition     = local.use_secret_manager != local.use_env_token
+      error_message = "Exactly one of buildkite_agent_token or buildkite_agent_token_secret must be provided."
+    }
+  }
 
   # Ensure IAM permissions are in place before creating the function
   # The storage_viewer permission is required for Cloud Build to access the gcf-v2-sources bucket
