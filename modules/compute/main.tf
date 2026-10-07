@@ -45,13 +45,13 @@ resource "google_compute_instance_template" "buildkite_agent" {
     }
   }
 
-  # Spot VMs are deleted on preemption; the MIG recreates capacity.
+  # MIGs reject DELETE as the Spot termination action; preempted VMs stop.
   scheduling {
     provisioning_model          = var.provisioning_model
     preemptible                 = var.provisioning_model == "SPOT"
     automatic_restart           = var.provisioning_model != "SPOT"
     on_host_maintenance         = var.provisioning_model == "SPOT" ? "TERMINATE" : "MIGRATE"
-    instance_termination_action = var.provisioning_model == "SPOT" ? "DELETE" : null
+    instance_termination_action = var.provisioning_model == "SPOT" ? "STOP" : null
   }
 
   service_account {

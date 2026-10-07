@@ -323,7 +323,7 @@ variable "autoscaler_depends_on" {
 }
 
 variable "provisioning_model" {
-  description = "VM provisioning model: STANDARD or SPOT. Spot VMs are deleted on preemption and the agent gets a shortened graceful shutdown."
+  description = "VM provisioning model: STANDARD or SPOT. Spot VMs stop on preemption and the agent gets a shortened graceful shutdown."
   type        = string
   default     = "STANDARD"
 

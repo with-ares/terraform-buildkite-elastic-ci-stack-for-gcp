@@ -44,8 +44,8 @@ run "uses_spot_vms" {
   }
 
   assert {
-    condition     = google_compute_instance_template.buildkite_agent.scheduling[0].instance_termination_action == "DELETE"
-    error_message = "Preempted Spot agents must be deleted so the MIG recreates capacity."
+    condition     = google_compute_instance_template.buildkite_agent.scheduling[0].instance_termination_action == "STOP"
+    error_message = "Spot agents in a MIG must stop on preemption; MIGs reject DELETE."
   }
 
   assert {
