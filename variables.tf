@@ -119,6 +119,17 @@ variable "machine_type" {
   }
 }
 
+variable "machine_types" {
+  description = "Machine types the instance group may create, most preferred first. When set, the group uses instance flexibility over these types (so a Spot shortage in one falls back to the next) instead of only machine_type, and distributes BALANCED across zones. Every type must support root_disk_type."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for t in var.machine_types : can(regex("^[a-z][a-z0-9-]+$", t))])
+    error_message = "Each machine type must be a valid GCP machine type."
+  }
+}
+
 variable "image" {
   description = "Source image for boot disk. Use a custom Packer-built image or a public Buildkite image."
   type        = string
@@ -137,13 +148,13 @@ variable "root_disk_size_gb" {
 }
 
 variable "root_disk_type" {
-  description = "Type of root disk: 'pd-standard' (cheaper, slower), 'pd-balanced' (recommended), 'pd-ssd' (fastest)"
+  description = "Type of root disk: 'pd-standard' (cheaper, slower), 'pd-balanced' (recommended), 'pd-ssd' (fastest), 'hyperdisk-balanced' (required by C4, C4D and N4 machine types)"
   type        = string
   default     = "pd-balanced"
 
   validation {
-    condition     = contains(["pd-standard", "pd-balanced", "pd-ssd"], var.root_disk_type)
-    error_message = "Root disk type must be one of: pd-standard, pd-balanced, pd-ssd."
+    condition     = contains(["pd-standard", "pd-balanced", "pd-ssd", "hyperdisk-balanced"], var.root_disk_type)
+    error_message = "Root disk type must be one of: pd-standard, pd-balanced, pd-ssd, hyperdisk-balanced."
   }
 }
 

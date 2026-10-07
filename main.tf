@@ -59,6 +59,7 @@ module "compute" {
 
   # Instance configuration
   machine_type      = var.machine_type
+  machine_types     = var.machine_types
   image             = var.image
   root_disk_size_gb = var.root_disk_size_gb
   root_disk_type    = var.root_disk_type

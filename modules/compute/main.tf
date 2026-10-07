@@ -108,6 +108,22 @@ resource "google_compute_region_instance_group_manager" "buildkite_agents" {
   }
 
   distribution_policy_zones = var.zones
+  # Instance flexibility doesn't support the default EVEN shape.
+  distribution_policy_target_shape = length(var.machine_types) > 0 ? "BALANCED" : null
+
+  dynamic "instance_flexibility_policy" {
+    for_each = length(var.machine_types) > 0 ? [1] : []
+    content {
+      dynamic "instance_selections" {
+        for_each = var.machine_types
+        content {
+          name          = instance_selections.value
+          rank          = instance_selections.key
+          machine_types = [instance_selections.value]
+        }
+      }
+    }
+  }
 
   # Apply new instance templates only when the MIG creates or otherwise
   # replaces an instance. Proactive updates and redistribution could select an
