@@ -145,6 +145,8 @@ resource "google_cloud_scheduler_job" "metrics_trigger" {
 
     oidc_token {
       service_account_email = local.service_account_email
+      # Matches what GCP stores when unset, so plans don't diff it every run.
+      audience = "${google_cloudfunctions2_function.metrics_function.service_config[0].uri}/"
     }
   }
 
